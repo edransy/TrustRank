@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TrustRank — A Formal Mathematical Model</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #111827;
+    --bg3: #1e2a3a;
+    --border: #1e2a3a;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --dim: #64748b;
+    --accent: #60a5fa;
+    --accent2: #06b6d4;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --purple: #a78bfa;
+    --box-bg: #0f1c2e;
+    --box-border: #1a3a5f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 16px;
+    line-height: 1.8;
+    padding: 0;
+  }
+  .page-header {
+    background: linear-gradient(180deg, #060d18 0%, #0d1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 52px 0 40px;
+    text-align: center;
+  }
+  .page-header .eyebrow {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .page-header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    color: #f1f5f9;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+  .page-header .tagline {
+    font-style: italic;
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  .layout {
+    display: flex;
+    max-width: 1100px;
+    margin: 0 auto;
+    gap: 0;
+  }
+  .toc {
+    width: 220px;
+    min-width: 220px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 28px 16px;
+    border-right: 1px solid var(--border);
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+  }
+  .toc::-webkit-scrollbar { width: 3px; }
+  .toc::-webkit-scrollbar-thumb { background: var(--border); }
+  .toc-title {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    padding-left: 8px;
+  }
+  .toc a {
+    display: block;
+    padding: 4px 8px;
+    font-size: 12px;
+    color: var(--dim);
+    text-decoration: none;
+    border-radius: 4px;
+    line-height: 1.5;
+    transition: all .15s;
+  }
+  .toc a:hover { color: var(--accent); background: rgba(96,165,250,0.08); }
+  .toc a.sub { padding-left: 18px; font-size: 11px; color: #3a4f6a; }
+  .toc a.sub:hover { color: var(--accent); }
+  .content {
+    flex: 1;
+    min-width: 0;
+    padding: 44px 52px;
+    max-width: 820px;
+  }
+  .content > section { margin-bottom: 56px; }
+  h2 {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  h2 .sec-num {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    font-family: 'Courier New', monospace;
+    background: rgba(96,165,250,0.1);
+    border: 1px solid rgba(96,165,250,0.2);
+    border-radius: 4px;
+    padding: 2px 7px;
+    letter-spacing: 0.05em;
+  }
+  h3 {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #cbd5e1;
+    margin: 28px 0 12px;
+  }
+  p { margin-bottom: 14px; color: var(--text); }
+  strong { color: #f1f5f9; font-weight: 600; }
+  em { color: var(--muted); }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Equation blocks */
+  .eq-block {
+    background: var(--box-bg);
+    border: 1px solid var(--box-border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 18px 24px;
+    margin: 20px 0;
+    overflow-x: auto;
+    font-size: 15px;
+  }
+  .eq-block.boxed {
+    border-left-color: var(--accent2);
+    background: #0a1a2a;
+  }
+  .eq-label {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    color: var(--accent2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .eq-inline {
+    background: rgba(96,165,250,0.07);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 0.92em;
+  }
+
+  /* Theorem boxes */
+  .theorem {
+    background: #0c1a0c;
+    border: 1px solid #1a3a1a;
+    border-left: 3px solid var(--green);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 20px 0;
+  }
+  .theorem-title {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+  .theorem p { color: #94a3b8; font-size: 14px; margin-bottom: 8px; }
+  .theorem .proof { font-size: 13px; color: var(--dim); margin-top: 8px; font-style: italic; }
+
+  /* Blockquotes */
+  blockquote {
+    border-left: 3px solid var(--amber);
+    background: #1a1500;
+    border-radius: 0 6px 6px 0;
+    padding: 14px 18px;
+    margin: 18px 0;
+    font-size: 14px;
+    color: #c8a94a;
+  }
+  blockquote strong { color: #fbbf24; }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; margin: 20px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-size: 13px;
+  }
+  th {
+    background: #111827;
+    color: var(--accent);
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    letter-spacing: 0.03em;
+  }
+  td {
+    padding: 9px 14px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  td code, th code {
+    font-family: 'Courier New', monospace;
+    background: rgba(96,165,250,0.1);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: var(--accent);
+  }
+  td strong { color: #f1f5f9; }
+
+  /* Code blocks */
+  .code-block {
+    background: #090e16;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: #7dd3fc;
+    line-height: 1.7;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .code-block .comment { color: #374151; }
+  .code-block .kw { color: var(--purple); }
+  .code-block .fn { color: var(--accent2); }
+  .code-block .num { color: var(--green); }
+
+  /* UX card mockup */
+  .ux-card {
+    background: #0a0e15;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 16px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+  .ux-card .ux-title { color: var(--accent); font-weight: bold; }
+  .ux-card .ux-score { color: var(--red); font-weight: bold; }
+  .ux-card .ux-bars { color: var(--green); }
+  .ux-card .ux-btn { color: var(--accent2); }
+
+  /* Param table highlight */
+  .param-key { font-family: 'Courier New', monospace; color: var(--accent2); }
+
+  /* Section divider label */
+  .section-anchor { display: block; height: 0; margin-top: -20px; padding-top: 80px; }
+
+  /* Highlight box */
+  .highlight-box {
+    background: #1a1000;
+    border: 1px solid #3a2800;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 18px 0;
+    font-size: 14px;
+    color: #c8a94a;
+  }
+  .highlight-box strong { color: var(--amber); }
+
+  /* Property tag */
+  .prop-badge {
+    display: inline-block;
+    background: rgba(96,165,250,0.1);
+    border: 1px solid rgba(96,165,250,0.2);
+    border-radius: 4px;
+    padding: 1px 7px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    margin-right: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="eyebrow">Formal Mathematical Model</div>
+  <h1>TrustRank</h1>
+  <div class="tagline">The crypto-native descendant of PageRank: trust as a stake-grounded eigenvector, defended by slashing.</div>
+</div>
+
+<div class="layout">
+  <!-- TOC -->
+  <nav class="toc">
+    <div class="toc-title">Contents</div>
+    <a href="#s0">0 · What this document is</a>
+    <a href="#s1">1 · The lineage, made exact</a>
+    <a href="#s2">2 · The trust graph G</a>
+    <a href="#s2" class="sub">2.1 Nodes and edges</a>
+    <a href="#s22" class="sub">2.2 Transition operator</a>
+    <a href="#s3">3 · TrustRank operator</a>
+    <a href="#s3" class="sub">3.1 Definition</a>
+    <a href="#s32" class="sub">3.2 Existence &amp; convergence</a>
+    <a href="#s33" class="sub">3.3 Damping = anti-collusion</a>
+    <a href="#s4">4 · Anti-TrustRank &amp; net trust</a>
+    <a href="#s4" class="sub">4.1 Distrust propagation</a>
+    <a href="#s42" class="sub">4.2 Net trust score</a>
+    <a href="#s43" class="sub">4.3 Spam-mass diagnostic</a>
+    <a href="#s5">5 · Seeds from anchors</a>
+    <a href="#s6">6 · Slashing</a>
+    <a href="#s7">7 · Temporal Trust Vector</a>
+    <a href="#s8">8 · Sybil &amp; collusion resistance</a>
+    <a href="#s9">9 · Personalized TrustRank</a>
+    <a href="#s10">10 · Algorithm &amp; complexity</a>
+    <a href="#s11">11 · UX — daily briefing</a>
+    <a href="#s12">12 · Parameters &amp; governance</a>
+    <a href="#s13">13 · Properties &amp; open problems</a>
+  </nav>
+
+  <!-- Main content -->
+  <main class="content">
+
+    <!-- §0 -->
+    <section>
+      <span class="section-anchor" id="s0"></span>
+      <h2><span class="sec-num">§0</span> What this document is</h2>
+      <p>The pitch and whitepaper establish a <strong>per-claim convergence engine</strong>: N LLM scorers submit belief vectors, an on-chain operator takes a stake-×-reputation weighted average, outliers are slashed, and dimensions settle under an ε-N rule.</p>
+      <p>This document supplies the missing <strong>global</strong> layer. Reputation in <code>OracleCore.sol</code> is currently a local scalar — a running product of one agent's own past alignment. That is link-count thinking. PageRank's central lesson is that authority is <strong>recursive and global</strong>.</p>
+      <p><strong>TrustRank</strong> = PageRank's recursive eigenvector authority + TrustRank/Anti-TrustRank spam-defense papers (Gyöngyi, Garcia-Molina, Pedersen 2004; Krishnan &amp; Raj 2006) + crypto-native capital-at-risk.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Borrowed from PageRank family</th><th>Kept crypto-native</th></tr></thead>
+          <tbody>
+            <tr><td>Recursive eigenvector authority (Page–Brin 1998)</td><td>Stake bonds on every edge</td></tr>
+            <tr><td>Random-surfer / damping &amp; teleport</td><td>Slashing of provably-wrong vouches</td></tr>
+            <tr><td>Power iteration + Perron–Frobenius convergence</td><td>On/off-chain <strong>anchor</strong> ground truth as seed oracle</td></tr>
+            <tr><td>TrustRank seed propagation + Anti-TrustRank distrust</td><td></td></tr>
+            <tr><td>Topic-sensitive / personalized PageRank</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- §1 -->
+    <section>
+      <span class="section-anchor" id="s1"></span>
+      <h2><span class="sec-num">§1</span> The lineage, made exact</h2>
+      <p>PageRank's web vector $r$ is the stationary distribution of a random surfer:</p>
+      <div class="eq-block">
+        <div class="eq-label">PageRank</div>
+        $$r \;=\; d\,P\,r \;+\; (1-d)\,\frac{1}{N}\mathbf{1}, \qquad P_{ji}=\frac{A_{ij}}{\sum_k A_{ik}}$$
+      </div>
+      <p>with $A$ the binary link matrix, $d\approx 0.85$ the damping factor, and a <strong>uniform</strong> teleport $\tfrac{1}{N}\mathbf{1}$.</p>
+      <p>The 2004 <strong>TrustRank</strong> spam paper changed exactly one thing: replace the uniform teleport with a <strong>biased seed vector</strong> $s^{+}$ supported on a hand-vetted set of known-good pages. Authority is now <strong>conservation-law constrained</strong>: the only way trust enters the system is through the seed.</p>
+      <p>TrustRank-for-crypto changes <strong>three</strong> things relative to web TrustRank:</p>
+      <ol style="margin-left:20px;margin-bottom:14px;color:var(--muted);font-size:15px;line-height:1.9">
+        <li style="margin-bottom:6px"><strong>Edges are bought.</strong> A web hyperlink is free; a TrustRank edge is a staked bond $B_{ij}$. Topology now has a price.</li>
+        <li style="margin-bottom:6px"><strong>Seeds are oracular, not manual.</strong> The seed set is produced automatically by the anchor engine — events that cannot be faked by a cartel.</li>
+        <li><strong>Distrust is enforced, not just propagated.</strong> When distrust flows back along an edge that contradicted an anchor, the edge's bond burns (slashing).</li>
+      </ol>
+    </section>
+
+    <!-- §2 -->
+    <section>
+      <span class="section-anchor" id="s2"></span>
+      <h2><span class="sec-num">§2</span> The trust graph G</h2>
+      <h3>2.1 Nodes and edges</h3>
+      <p>Let $\mathcal{N}$ be the set of <strong>entities</strong>, $|\mathcal{N}| = N$. A directed edge $i \to j$ means "$i$ has staked a bonded vouch/review on $j$." Each edge carries three time-stamped quantities at epoch $t$:</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Symbol</th><th>Meaning</th><th>Range</th></tr></thead>
+          <tbody>
+            <tr><td>$B_{ij} \ge 0$</td><td>Live <strong>bond</strong> $i$ has at risk on its review of $j$ (wei)</td><td>$[0,\infty)$</td></tr>
+            <tr><td>$q_{ij}\in[0,1]$</td><td><strong>Evidence quality</strong> of the review (citations, source diversity, co-reviewer agreement)</td><td>$[0,1]$</td></tr>
+            <tr><td>$f_{ij}(t)=e^{-(t-t_{ij})/H}$</td><td><strong>Freshness</strong> decay, half-life governed by $H$</td><td>$(0,1]$</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>The <strong>edge weight</strong> is the product:</p>
+      <div class="eq-block">
+        <div class="eq-label">Edge weight</div>
+        $$a_{ij} \;=\; B_{ij}\cdot q_{ij}\cdot f_{ij}(t)$$
+      </div>
+      <p>Define out-weight and in-weight:</p>
+      <div class="eq-block">
+        $$a_i^{\text{out}}=\sum_{j} a_{ij}, \qquad a_j^{\text{in}}=\sum_{i} a_{ij}$$
+      </div>
+
+      <h3 id="s22">2.2 Transition operator</h3>
+      <p>The forward (trust-flow) transition is row-stochastic over out-edges:</p>
+      <div class="eq-block">
+        <div class="eq-label">Transition matrix</div>
+        $$M_{ij} \;=\;\begin{cases}\dfrac{a_{ij}}{a_i^{\text{out}}}, & a_i^{\text{out}}>0,\\[1.2em] 0, & a_i^{\text{out}}=0 \;\;(\text{dangling node}).\end{cases}$$
+      </div>
+      <p>Let $P = M^{\top}$ (column-stochastic on non-dangling columns); $P_{ji}$ is the probability a trust-walker at $i$ steps to $j$. Dangling nodes are handled exactly as in PageRank: their mass is redirected to the seed vector via the dangling indicator $u\in\{0,1\}^N$, $u_i=\mathbb{1}[a_i^{\text{out}}=0]$.</p>
+    </section>
+
+    <!-- §3 -->
+    <section>
+      <span class="section-anchor" id="s3"></span>
+      <h2><span class="sec-num">§3</span> The TrustRank operator (forward authority)</h2>
+      <h3>3.1 Definition</h3>
+      <p>Let $s^{+}\in\Delta^{N-1}$ be the normalized <strong>good-seed teleport vector</strong> (§5), $\mathbf{1}^\top s^{+}=1$, $s^{+}>0$. The <strong>TrustRank vector</strong> $t\in\mathbb{R}^N$ is the fixed point:</p>
+      <div class="eq-block boxed">
+        <div class="eq-label">Core equation (TR)</div>
+        $$t \;=\; d\,\big(P + s^{+}u^{\top}\big)\,t \;+\; (1-d)\,s^{+} \tag{TR}$$
+      </div>
+      <p>Component form — <em>node $j$ is trusted to the degree that trusted nodes spend their out-weight on it, plus its own seed grounding:</em></p>
+      <div class="eq-block">
+        $$t_j \;=\; d\!\!\sum_{i\,:\,i\to j}\frac{a_{ij}}{a_i^{\text{out}}}\,t_i \;+\; d\,s_j^{+}\!\!\sum_{i\,\text{dangling}}\!\! t_i \;+\;(1-d)\,s_j^{+}$$
+      </div>
+
+      <h3 id="s32">3.2 Existence, uniqueness, convergence</h3>
+      <p>Define the <strong>Google matrix</strong>:</p>
+      <div class="eq-block">
+        <div class="eq-label">Google matrix</div>
+        $$G \;=\; d\big(P + s^{+}u^{\top}\big) + (1-d)\,s^{+}\mathbf{1}^{\top}$$
+      </div>
+
+      <div class="theorem">
+        <div class="theorem-title">Theorem 3.1 — Well-posedness</div>
+        <p>By Perron–Frobenius, $G$ has a unique stationary vector $t = Gt$ with eigenvalue $1$, $t>0$, $\mathbf{1}^\top t = 1$. The power iteration $t^{(k+1)}=Gt^{(k)}$ converges to $t$ from any stochastic start, geometrically:</p>
+        <div class="eq-block" style="margin:10px 0">$$\big\lVert t^{(k)} - t \big\rVert_1 \;\le\; C\, d^{\,k}$$</div>
+        <p class="proof"><em>Proof.</em> The subdominant eigenvalue of a personalized Google matrix obeys $|\lambda_2|\le d$ (Haveliwala–Kamvar 2003); the rest is the standard PageRank argument. □</p>
+      </div>
+
+      <h3 id="s33">3.3 The damping factor <em>is</em> the anti-collusion invariant</h3>
+      <p>The pitch's single critical invariant is the reward split $\text{reward}_i=\beta\cdot\text{agr}_{\text{anchors}}+(1-\beta)\cdot\text{agr}_{\text{peers}}$, with $\beta\ge0.6$. In TrustRank this is <strong>literally the teleport mass</strong>:</p>
+      <div class="eq-block boxed">
+        <div class="eq-label">Anti-collusion invariant (INV)</div>
+        $$1-d \;=\; \beta \;\ge\; 0.6 \quad\Longleftrightarrow\quad d \;\le\; 0.4 \tag{INV}$$
+      </div>
+      <blockquote>
+        <strong>Why crypto-TrustRank uses $d\le 0.4$, not web PageRank's $0.85$.</strong> Google can trust topology ($d=0.85$) because faking millions of links is expensive at web scale. In adversarial DeFi, links are cheap to manufacture, so we cap the topology channel at $d\le0.4$ and force $\ge0.6$ of all authority to originate from capital-grounded anchors. (INV) is exactly the pitch invariant, re-derived as a spectral parameter.
+      </blockquote>
+    </section>
+
+    <!-- §4 -->
+    <section>
+      <span class="section-anchor" id="s4"></span>
+      <h2><span class="sec-num">§4</span> Anti-TrustRank (backward distrust) and net trust</h2>
+      <h3>4.1 Distrust propagation</h3>
+      <p>Trust flows <em>forward</em> from good seeds; <strong>distrust flows backward</strong> from bad seeds to whoever vouched for them. Reverse transition over in-edges: $R_{ji}=a_{ij}/a_j^{\text{in}}$. The <strong>Anti-TrustRank vector</strong> $\delta\in\mathbb{R}^N$:</p>
+      <div class="eq-block boxed">
+        <div class="eq-label">Anti-TrustRank (ATR)</div>
+        $$\delta \;=\; d\,\big(R^{\top}+ s^{-}u_{\text{in}}^{\top}\big)\,\delta \;+\;(1-d)\,s^{-} \tag{ATR}$$
+      </div>
+
+      <h3 id="s42">4.2 Net trust score</h3>
+      <p>Let $\hat{t}_i = t_i/\max_k t_k$ and $\hat{\delta}_i=\delta_i/\max_k\delta_k$ be max-normalized to $[0,1]$. Two interchangeable forms:</p>
+      <div class="eq-block">
+        <div class="eq-label">Net score — two forms</div>
+        $$\tau_i \;=\; \hat{t}_i\,\big(1-\hat{\delta}_i\big) \qquad\text{(multiplicative gate)}$$
+        $$\tau_i \;=\; \big[\hat{t}_i - \lambda\,\hat{\delta}_i\big]_+ \quad\text{(linear penalty, } \lambda\ge1)$$
+      </div>
+      <p>The <strong>multiplicative gate</strong> is the default: $\hat{\delta}_i = 1$ drives $\tau_i$ to zero regardless of how high $\hat{t}_i$ is. An entity cannot have a good TrustRank score if its vouches have historically led the trust walker toward provably-bad outcomes.</p>
+
+      <h3 id="s43">4.3 Spam-mass: the topology-vs-grounding diagnostic</h3>
+      <p>Compute a topology-only centrality $c$ (TrustRank with uniform teleport) alongside the grounded $t$ (anchor teleport). Define:</p>
+      <div class="eq-block">
+        <div class="eq-label">SpamMass</div>
+        $$\text{SpamMass}_i \;=\; \frac{\big[c_i - t_i\big]_+}{c_i}\in[0,1]$$
+      </div>
+      <p>$\text{SpamMass}_i \to 1$ is the signature of a <strong>mutual-vouch cartel</strong>: a cluster of well-connected nodes that point at each other but have no connection to any anchor-grounded entity. This is an <strong>early-warning system</strong> — it flags manipulation before a real-world failure event.</p>
+    </section>
+
+    <!-- §5 -->
+    <section>
+      <span class="section-anchor" id="s5"></span>
+      <h2><span class="sec-num">§5</span> Seeds from anchors (the oracle that can't be bought)</h2>
+      <p>Let $\mathcal{E}_t$ be the anchor events observed up to epoch $t$, each with sign $\sigma_e\in\{+,-\}$, target entity $j(e)$, confidence $c_e\in[0,1]$, and recency weight $\phi_e=e^{-(t-t_e)/H_{\!A}}$.</p>
+      <div class="eq-block">
+        <div class="eq-label">Raw seeds</div>
+        $$\tilde{s}^{+}_j=\sum_{e:\,\sigma_e=+,\,j(e)=j} c_e\,\phi_e, \qquad \tilde{s}^{-}_j=\sum_{e:\,\sigma_e=-,\,j(e)=j} c_e\,\phi_e$$
+      </div>
+      <p>Smooth with a uniform floor $\varepsilon_s>0$ and normalize:</p>
+      <div class="eq-block">
+        <div class="eq-label">Normalized seeds</div>
+        $$s^{+} = (1-\varepsilon_s)\frac{\tilde{s}^{+}}{\mathbf{1}^\top\tilde{s}^{+}} + \varepsilon_s\frac{1}{N}\mathbf{1}, \qquad s^{-} = \frac{\tilde{s}^{-}}{\mathbf{1}^\top\tilde{s}^{-}}$$
+      </div>
+      <p>The floor $\varepsilon_s\tfrac{1}{N}\mathbf{1}$ is a mathematical necessity — Theorem 3.1 requires $s^{+}>0$ (strictly positive everywhere) to guarantee irreducibility of the Google matrix. <strong>No cartel can mint a positive anchor or fake a negative one</strong> — the former requires real elapsed time and external institutional verification.</p>
+    </section>
+
+    <!-- §6 -->
+    <section>
+      <span class="section-anchor" id="s6"></span>
+      <h2><span class="sec-num">§6</span> Slashing as enforced distrust attenuation</h2>
+      <p>When a negative anchor fires on $j$, the <strong>distrust flux</strong> crossing edge $i\to j$ in one walker step:</p>
+      <div class="eq-block">
+        <div class="eq-label">Distrust flux</div>
+        $$\Phi_{ij} \;=\; d\,R_{ji}\,\delta_j \;=\; d\,\frac{a_{ij}}{a_j^{\text{in}}}\,\delta_j$$
+      </div>
+      <p>The bond $B_{ij}$ that $i$ staked on its (now falsified) vouch of $j$ is slashed:</p>
+      <div class="eq-block boxed">
+        <div class="eq-label">Slash formula</div>
+        $$\text{slash}_{ij} \;=\; \min\!\Big(B_{ij},\;\; \kappa\,B_{ij}\,\hat{\Phi}_{ij}\,\big(1+\mu\,\text{SpamMass}_i\big)\Big)$$
+      </div>
+      <p>where $\hat{\Phi}_{ij}=\Phi_{ij}/\max\Phi$ normalizes flux to $[0,1]$, $\kappa\in(0,1]$ is the base slash rate, and $\mu\ge0$ is the spam-mass amplifier. Slashed wei are burned to <code>0x…dEaD</code>, not redistributed.</p>
+      <p>This is the <strong>graph-level generalization</strong> of <code>OracleCore.sol</code>'s current per-spec deviation slash: a global, multi-hop test rather than a local, single-round test.</p>
+    </section>
+
+    <!-- §7 -->
+    <section>
+      <span class="section-anchor" id="s7"></span>
+      <h2><span class="sec-num">§7</span> Coupling to the Temporal Trust Vector</h2>
+      <h3>7.1 Topic-sensitive reliability (5 reliabilities, not 1)</h3>
+      <p>Run TrustRank <strong>per dimension</strong> $k\in\{$sec, liq, team, exec, harm$\}$ with dimension-specific seeds. Output: a reliability matrix:</p>
+      <div class="eq-block">
+        $$r_i^{(k)} \;=\; \tau_i^{(k)} \;\in[0,1],\qquad k=1,\dots,5$$
+      </div>
+
+      <h3>7.2 The unified epoch update</h3>
+      <p>Replace the scalar weight with a dimension-indexed TrustRank reliability:</p>
+      <div class="eq-block">
+        <div class="eq-label">Dimension-aware consensus</div>
+        $$w_i^{(k)} \;=\; \text{stake}_i \cdot r_i^{(k)}, \qquad C^{(k)}_t \;=\; \frac{\sum_i w_i^{(k)}\,v_i^{(k)}}{\sum_i w_i^{(k)}}$$
+      </div>
+      <p>Apply temporal smoothing (unchanged from pitch):</p>
+      <div class="eq-block">
+        <div class="eq-label">Temporal smoothing</div>
+        $$V^{(k)}_{t+1} \;=\; (1-\alpha)\,V^{(k)}_t \;+\; \alpha\,C^{(k)}_t, \qquad \alpha=\sigma\!\big(w_1\text{conf}+w_2\text{age}+w_3\text{anchorFire}+w_4\text{varSpike}\big)$$
+      </div>
+      <p>Reviewer reliabilities also smooth forward:</p>
+      <div class="eq-block">
+        $$r^{(k)}_{i,t+1} = (1-\alpha)\,r^{(k)}_{i,t} + \alpha\,\tau^{(k)}_{i,t}$$
+      </div>
+      <p>Full per-epoch pipeline: <strong>anchors → seeds → (TR)/(ATR) → $\tau^{(k)}$ → weights $w^{(k)}$ → consensus $C^{(k)}$ → smoothed $V^{(k)}$</strong>, with slashing applied on any negative-anchor fire.</p>
+    </section>
+
+    <!-- §8 -->
+    <section>
+      <span class="section-anchor" id="s8"></span>
+      <h2><span class="sec-num">§8</span> Sybil &amp; collusion resistance</h2>
+
+      <div class="theorem">
+        <div class="theorem-title">Theorem 8.1 — Closed cartels earn nothing</div>
+        <p>Let $C\subset\mathcal{N}$ be a clique with no good-seed mass ($s^{+}_i=0\ \forall i\in C$) and no incoming edges from $\mathcal{N}\setminus C$. Then:</p>
+        <div class="eq-block" style="margin:10px 0">$$\sum_{i\in C} t_i \;=\; (1-d)\sum_{i\in C}s^{+}_i \;=\; 0 \quad(\text{up to the }\varepsilon_s\text{ floor})$$</div>
+        <p class="proof"><em>Proof.</em> The sub-chain restricted to $C$ is isolated — it has no external inflow — so its stationary mass equals only the teleport contribution, which is zero. □</p>
+      </div>
+
+      <div class="theorem">
+        <div class="theorem-title">Theorem 8.2 — Bounded leakage</div>
+        <p>If outside parties direct total trust-flow $\theta$ into $C$, then:</p>
+        <div class="eq-block" style="margin:10px 0">$$\sum_{i\in C}t_i \le \dfrac{d}{1-d}\,\theta \le \dfrac{0.4}{0.6}\,\theta = \tfrac{2}{3}\theta \quad\text{under (INV)}$$</div>
+      </div>
+
+      <div class="theorem">
+        <div class="theorem-title">Theorem 8.3 — Attack-cost lower bound</div>
+        <p>To raise a fraudulent entity $X$ to score $\tau_X\ge\tau^*$, an adversary must source genuine trust-flow $\theta \ge \tfrac{1-d}{d}\,\tau^*\,\max_k t_k$ from non-Sybil vouchers. Profitable attack therefore requires:</p>
+        <div class="eq-block" style="margin:10px 0">$$\text{gain}(X) > \tfrac{1-d}{d}\,\tau^*\,\kappa\,\bar{B}$$</div>
+        <p>which the operator can set above any realizable extraction by choosing $\kappa$ and the minimum bond size $\bar{B}$.</p>
+      </div>
+
+      <div class="highlight-box">
+        <strong>Spectral + economic, not either alone.</strong> The (INV) constraint $d\le0.4$ caps topology amplification. Bonds make acquiring genuine trust-flow expensive. Slashing makes bond loss certain upon anchor fire. Spam-mass detects manipulation before anchors fire. <em>None of the three mechanisms works alone — the combination is what makes Thm 8.3 binding.</em>
+      </div>
+    </section>
+
+    <!-- §9 -->
+    <section>
+      <span class="section-anchor" id="s9"></span>
+      <h2><span class="sec-num">§9</span> Personalized TrustRank for consumers</h2>
+      <p>Each consumer supplies a <strong>personalized teleport</strong> $s_\pi$ representing their own trust priors:</p>
+      <div class="eq-block">
+        $$t_\pi \;=\; d\big(P+s_\pi u^{\top}\big)t_\pi + (1-d)s_\pi, \qquad \texttt{getTrustVector}(X\mid\pi)\;=\;\tau_{\pi,X}^{(1..5)}$$
+      </div>
+      <p>The key computational trick: if $s_\pi = \sum_b \omega_b e_b$, then by <strong>linearity of personalized PageRank</strong>:</p>
+      <div class="eq-block">
+        $$t_\pi = \sum_b \omega_b\,t_{e_b}$$
+      </div>
+      <p>Basis vectors $t_{e_b}$ are precomputed once per epoch. Any consumer's personalized view is then a cheap linear combination of cached basis vectors — <strong>no new power iteration, just a dot product</strong>. A conservative insurance protocol and an aggressive launchpad read the same ledger through different linear combinations.</p>
+    </section>
+
+    <!-- §10 -->
+    <section>
+      <span class="section-anchor" id="s10"></span>
+      <h2><span class="sec-num">§10</span> Algorithm, complexity, on/off-chain split</h2>
+      <div class="code-block"><span class="comment"># EPOCH(t)</span>
+<span class="comment"># ── off-chain (verifiable, ZK-provable execution) ──</span>
+<span class="num">1.</span> ingest anchor events Eₜ            → build s⁺(k), s⁻(k)        <span class="comment">(§5)</span>
+<span class="num">2.</span> assemble edges (B,q,f)             → A, M=rowstoch(A), P=Mᵀ     <span class="comment">(§2)</span>
+<span class="num">3.</span> <span class="kw">for</span> k <span class="kw">in</span> dims:
+      t(k)  ← <span class="fn">PowerIter</span>(G⁺(k), s⁺(k))       <span class="comment"># TrustRank    (TR)</span>
+      δ(k)  ← <span class="fn">PowerIter</span>(G⁻(k), s⁻(k))       <span class="comment"># Anti-TrustRank (ATR)</span>
+      c(k)  ← <span class="fn">PowerIter</span>(uniform teleport)   <span class="comment"># spam-mass baseline (§4.3)</span>
+      τ(k)  ← <span class="fn">gate</span>(t(k), δ(k));  SpamMass ← (c−t)/c
+<span class="num">4.</span> weights wᵢ(k) = stakeᵢ·τᵢ(k)
+<span class="num">5.</span> Cₜ(k)  = Σ wᵢ(k) vᵢ(k) / Σ wᵢ(k)        <span class="comment"># consensus  (§7.2)</span>
+<span class="num">6.</span> on any negative anchor: slashᵢⱼ from distrust flux Φ         <span class="comment">(§6)</span>
+<span class="comment"># ── on-chain (OracleCore-style settlement) ──</span>
+<span class="num">7.</span> V(k)_{t+1} = (1-α)V(k)ₜ + α Cₜ(k);  publish τ, V, citations
+<span class="num">8.</span> ε-N settlement check per dimension; emit timeline event</div>
+
+      <p><strong>Complexity.</strong> Each power iteration step costs $O(\text{nnz}(A))$. With $d\le0.4$, iterations to reach tolerance $\eta=10^{-6}$:</p>
+      <div class="eq-block">
+        $$\lceil\log_{1/d}(1/\eta)\rceil = \lceil\log_{2.5}(10^6)\rceil \approx 15 \text{ iterations}$$
+      </div>
+      <p>15 sequences in parallel, all sharing matrix $P$. For 10,000 entities and 100,000 vouches: well under a second on modern hardware. <strong>The low damping that defends us spectrally also makes computation faster</strong> — a rare alignment of security and performance incentives.</p>
+    </section>
+
+    <!-- §11 -->
+    <section>
+      <span class="section-anchor" id="s11"></span>
+      <h2><span class="sec-num">§11</span> UX vision — the daily trust briefing</h2>
+      <h3>11.2 The daily briefing format</h3>
+      <div class="ux-card">
+<span class="ux-title">┌─────────────────────────────────────────────────────────┐</span>
+<span class="ux-title">│  ● Uniswap                     TrustRank </span><span class="ux-score">0.81 ↓</span><span class="ux-title">        │</span>
+│  "Router upgrade audit pending — security score soft    │
+│   while new bytecode unverified. Liquidity strong."     │
+│                                                         │
+│  <span class="ux-bars">sec ████████░░  liq ██████████  team ████████░░</span>        │
+│  <span class="ux-bars">exec ███████░░  harm █████████░</span>                        │
+│                                                         │
+│  <span class="ux-btn">[Read reasoning]  [Accept]  [Adjust ▾]</span>                 │
+<span class="ux-title">└─────────────────────────────────────────────────────────┘</span>
+      </div>
+
+      <h3>11.3 The adjustment mechanic</h3>
+      <div class="ux-card">
+  Security   [◄────────●──────────►]  0.72  → you: <span class="ux-score">0.65</span>
+  Liquidity  [◄──────────●────────►]  0.89  → (no change)
+  Team       [◄─────●─────────────►]  0.61  → you: <span class="ux-bars">0.70</span>
+  Execution  [◄────────●──────────►]  0.68  → (no change)
+  User harm  [◄──────────●────────►]  0.84  → (no change)
+      </div>
+      <p>Adjustments are only submitted with a citation — enforcing the $q_{ij}$ evidence quality factor at the UX layer. Users who bond receive proportionally more weight and earn a share of the slash pool from liars.</p>
+    </section>
+
+    <!-- §12 -->
+    <section>
+      <span class="section-anchor" id="s12"></span>
+      <h2><span class="sec-num">§12</span> Parameters &amp; governance</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Symbol</th><th>Role</th><th>Safe range</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td class="param-key">$d$</td><td>Damping / topology channel</td><td>$[0.2,\,0.4]$</td><td><strong>must</strong> satisfy (INV) $d\le1-\beta_{\min}$; lowering improves both security and convergence</td></tr>
+            <tr><td class="param-key">$\beta_{\min}$</td><td>Anchor mass floor</td><td>$\ge 0.6$</td><td>The pitch invariant; $= 1-d_{\max}$; must not be governable independently of $d$</td></tr>
+            <tr><td class="param-key">$H$</td><td>Edge freshness half-life</td><td>2–8 epochs</td><td>Shorter = more reactive; longer = more stable against rapid-unvouch attacks</td></tr>
+            <tr><td class="param-key">$H_{\!A}$</td><td>Anchor recency half-life</td><td>4–26 epochs</td><td>Must satisfy $H_A > H$; hacks should linger longer than vouches</td></tr>
+            <tr><td class="param-key">$\varepsilon_s$</td><td>Teleport floor</td><td>$10^{-3}$–$10^{-2}$</td><td>Guarantees $s^{+}>0$ ⇒ irreducibility ⇒ Thm 3.1</td></tr>
+            <tr><td class="param-key">$\kappa$</td><td>Base slash rate</td><td>$0.3$–$1.0$</td><td>Maps to <code>slashBps</code> in <code>OracleCore.sol</code>; must satisfy Thm 8.3 bound</td></tr>
+            <tr><td class="param-key">$\mu$</td><td>Spam-mass slash amplifier</td><td>$0$–$3$</td><td>$\mu=0$ disables amplifier; $\mu=3$ triples slash for max-SpamMass vouchers</td></tr>
+            <tr><td class="param-key">$\lambda$</td><td>Distrust penalty (linear form)</td><td>$\ge1$</td><td>$\lambda&lt;1$ creates an asymmetry sophisticated attackers can exploit</td></tr>
+            <tr><td class="param-key">$\eta$</td><td>Power-iteration tolerance</td><td>$10^{-6}$</td><td>Should be ≥ one order of magnitude tighter than the settlement threshold ε</td></tr>
+            <tr><td class="param-key">$\alpha$</td><td>Temporal temperature</td><td>governed $\sigma(\cdot)$</td><td>Unchanged from pitch §5; must be consistent with $r^{(k)}_i$ update rate (§7.2)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- §13 -->
+    <section>
+      <span class="section-anchor" id="s13"></span>
+      <h2><span class="sec-num">§13</span> Properties summary &amp; open problems</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Property</th><th>Statement</th><th>Mechanism</th></tr></thead>
+          <tbody>
+            <tr><td><span class="prop-badge">TR-1</span> Well-posed global trust</td><td>Unique $t=Gt$, geometric power iteration</td><td>Perron–Frobenius, $s^{+}>0$ (Thm 3.1)</td></tr>
+            <tr><td><span class="prop-badge">TR-2</span> Anti-collusion = damping</td><td>$1-d=\beta\ge0.6$</td><td>The (INV) identity</td></tr>
+            <tr><td><span class="prop-badge">TR-3</span> Closed cartels worthless</td><td>$\sum_C t_i = 0$</td><td>Seed-only inflow (Thm 8.1)</td></tr>
+            <tr><td><span class="prop-badge">TR-4</span> Bounded trust amplification</td><td>$\sum_C t_i \le \tfrac{d}{1-d}\theta$</td><td>Spectral bound (Thm 8.2)</td></tr>
+            <tr><td><span class="prop-badge">TR-5</span> Costly attacks</td><td>gain must exceed $\tfrac{1-d}{d}\tau^*\kappa\bar{B}$</td><td>Bonds + slash (Thm 8.3)</td></tr>
+            <tr><td><span class="prop-badge">TR-6</span> Pre-anchor detection</td><td>$\text{SpamMass}\to1$ flags ungrounded rank</td><td>Topology-vs-grounding (§4.3)</td></tr>
+            <tr><td><span class="prop-badge">TR-7</span> Enforced distrust</td><td>Bonds burn along distrust flux</td><td>Anti-TrustRank + slash (§6)</td></tr>
+            <tr><td><span class="prop-badge">TR-8</span> Topic-specific reliability</td><td>Per-dim $r_i^{(k)}$</td><td>Topic-sensitive PageRank (§7.1)</td></tr>
+            <tr><td><span class="prop-badge">TR-9</span> Cheap consumer views</td><td>$t_\pi=\sum\omega_b t_{e_b}$</td><td>Personalized-PR linearity (§9)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Open problems</h3>
+      <ol style="margin-left:20px;color:var(--muted);font-size:15px;line-height:2">
+        <li style="margin-bottom:8px"><strong>Correlated seed errors.</strong> A wrong positive anchor is a trusted-seed poisoning. The formal bound on shift: $\Delta t_\infty \le (1-d)\cdot\Delta s^{+}_\infty$, derivable from the Lipschitz continuity of the Google matrix.</li>
+        <li style="margin-bottom:8px"><strong>Edge-bond liquidity.</strong> A shared-bond pool (similar to a clearinghouse margin system) could reduce honest participation friction without losing the economic deterrent.</li>
+        <li style="margin-bottom:8px"><strong>Dynamic-graph drift.</strong> Incremental PageRank algorithms (Desikan et al. 2005, Bahmani et al. 2010) update only affected entries when a small number of edges change — correctness under TrustRank's changing bonds and freshness decay is open.</li>
+        <li><strong>Teleport gaming.</strong> A consumer concentrating personalized $s_\pi$ on entities they control can engineer a self-serving view. Mitigation: restrict personalized teleports to a vetted canonical basis set.</li>
+      </ol>
+
+      <div class="highlight-box" style="margin-top:32px;text-align:center;font-style:italic;font-size:15px">
+        PageRank ranked the web by who links to you.<br>
+        <strong>TrustRank ranks crypto by who stakes on you — and burns them when they're wrong.</strong>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: '$$', right: '$$', display: true},
+      {left: '$', right: '$', display: false}
+    ],
+    throwOnError: false,
+    errorColor: '#f87171'
+  });
+</script>
+</body>
+</html>
