@@ -23,23 +23,18 @@ Static output is written to `out/`.
 
 ## Deploy to GitHub Pages
 
-**One-time setup (required):**
+**One-time setup:**
 
 1. Open [TrustRank → Settings → Pages](https://github.com/edransy/TrustRank/settings/pages)
-2. Under **Build and deployment**, set **Source** to **GitHub Actions** (not “Deploy from a branch”)
-3. Save — no branch or folder selection is needed
+2. Under **Build and deployment**, set **Source** to **Deploy from a branch**
+3. Set **Branch** to `gh-pages` and folder `/ (root)`
+4. Click **Save**
 
-**Then push to `main`:**
-
-```bash
-git push origin main
-```
-
-The workflow builds `out/` and deploys automatically.
+The workflow builds `out/` and pushes it to the `gh-pages` branch on every push to `main`. No GitHub Actions Pages integration is required.
 
 Live URL: `https://edransy.github.io/TrustRank/`
 
-If the Actions run still fails with “Get Pages site failed”, Pages is not enabled yet — complete step 2 above, then re-run the workflow from the Actions tab.
+**First deploy:** push to `main`, wait for the workflow to finish, then refresh the Pages settings — the `gh-pages` branch is created automatically by the deploy step.
 
 ## Source of truth
 
