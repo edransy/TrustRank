@@ -23,11 +23,23 @@ Static output is written to `out/`.
 
 ## Deploy to GitHub Pages
 
-1. Push this directory to [edransy/TrustRank](https://github.com/edransy/TrustRank) on GitHub.
-2. In the repo **Settings → Pages**, set **Build and deployment** source to **GitHub Actions**.
-3. Push to `main` — the included workflow builds and deploys automatically.
+**One-time setup (required):**
+
+1. Open [TrustRank → Settings → Pages](https://github.com/edransy/TrustRank/settings/pages)
+2. Under **Build and deployment**, set **Source** to **GitHub Actions** (not “Deploy from a branch”)
+3. Save — no branch or folder selection is needed
+
+**Then push to `main`:**
+
+```bash
+git push origin main
+```
+
+The workflow builds `out/` and deploys automatically.
 
 Live URL: `https://edransy.github.io/TrustRank/`
+
+If the Actions run still fails with “Get Pages site failed”, Pages is not enabled yet — complete step 2 above, then re-run the workflow from the Actions tab.
 
 ## Source of truth
 
